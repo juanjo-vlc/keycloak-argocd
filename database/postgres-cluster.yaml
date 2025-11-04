@@ -16,6 +16,22 @@ spec:
     keycloak: keycloak
   postgresql:
     version: "15"
+  enableConnectionPooler: true
+  enableReplicaConnectionPooler: true
+  connectionPooler:
+    numberOfInstances: 2
+    mode: "transaction"
+    schema: "pooler"
+    user: "pooler"
+    dockerImage: "registry.opensource.zalan.do/acid/pgbouncer:master-32"
+    maxDBConnections: 60
+    resources:
+      requests:
+        cpu: 100m
+        memory: 100Mi
+      limits:
+        cpu: 200m
+        memory: 200Mi
   resources:
     requests:
       cpu: 100m
