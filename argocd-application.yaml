@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: git@github.com:juanjo-vlc/keycloak-argocd.git
+    repoURL: https://github.com/juanjo-vlc/keycloak-argocd.git
     targetRevision: HEAD
     path: .
   destination:
