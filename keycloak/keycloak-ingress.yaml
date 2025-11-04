@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: keycloak
-  namespace: database
+  namespace: keycloak
   annotations:
     cert-manager.io/cluster-issuer: rancher-subca
     nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"

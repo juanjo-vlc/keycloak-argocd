@@ -4,21 +4,24 @@ This repository contains the manifests for deploying a High Availability Keycloa
 
 ## Components
 
-- **PostgreSQL Cluster**: 2-replica PostgreSQL cluster using Zalando operator
-- **Keycloak**: 3-replica StatefulSet with JGroups clustering for HA
+- **PostgreSQL Cluster**: 2-replica PostgreSQL cluster using Zalando operator (database namespace)
+- **Keycloak**: 3-replica StatefulSet with JGroups clustering for HA (keycloak namespace)
 - **SOPS Encryption**: Database credentials encrypted with SOPS
-- **ArgoCD**: GitOps deployment automation
+- **ArgoCD**: GitOps deployment automation with two applications (one per namespace)
 
 ## Repository Structure
 
 ```
 .
 ├── .sops.yaml                    # SOPS configuration
-├── postgres-cluster.yaml         # PostgreSQL cluster definition
-├── keycloak-db-secret.yaml       # SOPS-encrypted database credentials
-├── keycloak-deployment.yaml      # Keycloak StatefulSet and Services
-├── keycloak-ingress.yaml         # Keycloak Ingress
-├── argocd-application.yaml       # ArgoCD Application manifest
+├── database/                     # Database namespace resources
+│   ├── postgres-cluster.yaml    # PostgreSQL cluster definition
+│   └── keycloak-db-secret.yaml  # SOPS-encrypted database credentials
+├── keycloak/                     # Keycloak namespace resources
+│   ├── keycloak-db-secret.yaml  # SOPS-encrypted database credentials (copy)
+│   ├── keycloak-deployment.yaml # Keycloak StatefulSet and Services
+│   └── keycloak-ingress.yaml    # Keycloak Ingress
+├── argocd-application.yaml       # ArgoCD Application manifests
 └── README.md                     # This file
 ```
 
@@ -43,7 +46,7 @@ git push -u origin main
 
 ### 2. Deploy with ArgoCD
 
-Apply the ArgoCD Application manifest:
+Apply the ArgoCD Application manifests (creates both database and keycloak applications):
 ```bash
 kubectl apply -f argocd-application.yaml --kubeconfig ~/.kube/anthrax.yaml
 ```
@@ -52,6 +55,7 @@ kubectl apply -f argocd-application.yaml --kubeconfig ~/.kube/anthrax.yaml
 
 Check the ArgoCD Application status:
 ```bash
+kubectl get application keycloak-database -n argocd --kubeconfig ~/.kube/anthrax.yaml
 kubectl get application keycloak -n argocd --kubeconfig ~/.kube/anthrax.yaml
 ```
 
@@ -62,7 +66,7 @@ kubectl get postgresql -n database --kubeconfig ~/.kube/anthrax.yaml
 
 Check Keycloak pods:
 ```bash
-kubectl get pods -n database -l app=keycloak --kubeconfig ~/.kube/anthrax.yaml
+kubectl get pods -n keycloak -l app=keycloak --kubeconfig ~/.kube/anthrax.yaml
 ```
 
 ## Accessing Keycloak
@@ -74,9 +78,15 @@ Once deployed, Keycloak will be accessible at:
 
 ## Database Credentials
 
-The database credentials are managed by SOPS encryption. To view them:
+The database credentials are managed by SOPS encryption and stored in both namespaces:
+- `database/keycloak-db-secret.yaml` - Original secret in database namespace
+- `keycloak/keycloak-db-secret.yaml` - Copy in keycloak namespace for app access
+
+To view them:
 ```bash
-sops -d keycloak-db-secret.yaml
+sops -d database/keycloak-db-secret.yaml
+# or
+sops -d keycloak/keycloak-db-secret.yaml
 ```
 
 ## SOPS Configuration
@@ -118,7 +128,7 @@ kubectl logs -n postgres-operator -l app.kubernetes.io/name=postgres-operator
 ### Keycloak pods not clustering
 Check JGroups communication:
 ```bash
-kubectl logs -n database keycloak-0 | grep jgroups
+kubectl logs -n keycloak keycloak-0 | grep jgroups
 ```
 
 ### SOPS decryption issues in ArgoCD

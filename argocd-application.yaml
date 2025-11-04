@@ -1,6 +1,27 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  name: keycloak-database
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/juanjo-vlc/keycloak-argocd.git
+    targetRevision: HEAD
+    path: database
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: database
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
   name: keycloak
   namespace: argocd
 spec:
@@ -8,10 +29,10 @@ spec:
   source:
     repoURL: https://github.com/juanjo-vlc/keycloak-argocd.git
     targetRevision: HEAD
-    path: .
+    path: keycloak
   destination:
     server: https://kubernetes.default.svc
-    namespace: database
+    namespace: keycloak
   syncPolicy:
     automated:
       prune: true
