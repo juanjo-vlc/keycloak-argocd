@@ -20,7 +20,7 @@ spec:
   enableReplicaConnectionPooler: true
   connectionPooler:
     numberOfInstances: 2
-    mode: "transaction"
+    mode: "session"
     schema: "pooler"
     user: "pooler"
     dockerImage: "registry.opensource.zalan.do/acid/pgbouncer:master-32"
