@@ -1,0 +1,25 @@
+apiVersion: acid.zalan.do/v1
+kind: postgresql
+metadata:
+  name: keycloak-postgres
+  namespace: database
+spec:
+  teamId: "keycloak"
+  volume:
+    size: 10Gi
+  numberOfInstances: 2
+  users:
+    keycloak:
+    - superuser
+    - createdb
+  databases:
+    keycloak: keycloak
+  postgresql:
+    version: "15"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
